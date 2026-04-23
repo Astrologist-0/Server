@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contains AWS credentials)
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
