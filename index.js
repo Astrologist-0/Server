@@ -91,6 +91,8 @@ app.post('/api/charts', async (req, res) => {
       ayanamsa:   sanitize(body.ayanamsa),
       planets:    sanitize(body.planets   || {}),
       panchanga:  sanitize(body.panchanga || {}),
+      type:       body.type     || 'primary',
+      linkedTo:   body.linkedTo || '',
     };
 
     const saved = await saveChart(data);

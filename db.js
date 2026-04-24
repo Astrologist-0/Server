@@ -19,18 +19,20 @@ const TABLE = process.env.DYNAMODB_TABLE || 'astrologist-customers';
 // Save or update a customer chart
 async function saveChart(data) {
   const item = {
-    customerId: data.customerId,          // partition key (uuid)
+    customerId: data.customerId,
     createdAt:  data.createdAt || new Date().toISOString(),
     updatedAt:  new Date().toISOString(),
     name:       data.name       || '',
     location:   data.location   || '',
     lat:        data.lat,
     lon:        data.lon,
-    birthDate:  data.birthDate,           // ISO string
+    birthDate:  data.birthDate,
     lagnaSign:  data.lagnaSign,
     ayanamsa:   data.ayanamsa,
     planets:    data.planets    || {},
     panchanga:  data.panchanga  || {},
+    type:       data.type       || 'primary',
+    linkedTo:   data.linkedTo   || '',
   };
   await db.send(new PutCommand({ TableName: TABLE, Item: item }));
   return item;
