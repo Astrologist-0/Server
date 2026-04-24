@@ -6,13 +6,26 @@ const express = require('express');
 const cors    = require('cors');
 const { randomUUID } = require('crypto');
 const { saveChart, getChart, listCharts, deleteChart } = require('./db');
+const { searchAstrology } = require('./search');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
 // Allow all origins explicitly
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const origin = req.headers.origin;
+  const allowed = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    // Add your Vercel URLs here after deploying:
+    // 'https://astrologist.vercel.app',
+    // 'https://astrologist-admin.vercel.app',
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
+  ];
+  if (!origin || origin.startsWith('http://localhost') || allowed.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  }
   res.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -23,6 +36,20 @@ app.use(express.json());
 
 // ── Health check ──
 app.get('/health', (_, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+
+// ── Astrology web search ──
+// POST /api/search
+app.post('/api/search', async (req, res) => {
+  try {
+    const { question, chartContext } = req.body;
+    if (!question) return res.status(400).json({ error: 'question is required' });
+    const result = await searchAstrology(question, chartContext || {});
+    res.json({ success: true, ...result });
+  } catch (err) {
+    console.error('Search error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Sanitize value for DynamoDB — round floats, remove undefined/NaN
 function sanitize(val) {
