@@ -18,13 +18,13 @@ app.use((req, res, next) => {
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:5175',
-    // Add your Vercel URLs here after deploying:
-    // 'https://astrologist.vercel.app',
-    // 'https://astrologist-admin.vercel.app',
-    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : []),
   ];
+
   if (!origin || origin.startsWith('http://localhost') || allowed.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin || '*');
+  } else {
+    console.warn('CORS blocked:', origin, '| Allowed:', allowed);
   }
   res.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
