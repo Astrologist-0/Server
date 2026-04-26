@@ -7,6 +7,7 @@ const cors    = require('cors');
 const { randomUUID } = require('crypto');
 const { saveChart, getChart, listCharts, deleteChart } = require('./db');
 const { searchAstrology } = require('./search');
+const { ragAnswer } = require('./rag');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -35,6 +36,22 @@ app.post('/api/search', async (req, res) => {
     res.json({ success: true, ...result });
   } catch (err) {
     console.error('Search error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── RAG: Crawl + Gemini answer ──
+// POST /api/ask
+app.post('/api/ask', async (req, res) => {
+  try {
+    const { question, chartContext } = req.body;
+    if (!question) return res.status(400).json({ error: 'question is required' });
+    if (!chartContext) return res.status(400).json({ error: 'chartContext is required' });
+
+    const result = await ragAnswer(question, chartContext);
+    res.json({ success: true, answer: result.answer, sources: result.sources });
+  } catch (err) {
+    console.error('RAG error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
