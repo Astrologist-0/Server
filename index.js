@@ -49,7 +49,7 @@ app.post('/api/ask', async (req, res) => {
     if (!chartContext) return res.status(400).json({ error: 'chartContext is required' });
 
     const result = await ragAnswer(question, chartContext);
-    res.json({ success: true, answer: result.answer, sources: result.sources });
+    res.json({ success: true, answer: result.answer, followUps: result.followUps || [], sources: result.sources });
   } catch (err) {
     console.error('RAG error:', err.message);
     res.status(500).json({ error: err.message });
